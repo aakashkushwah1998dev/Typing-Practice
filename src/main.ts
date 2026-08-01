@@ -39,6 +39,7 @@ import {
   shouldSurpriseMap,
   streakChest,
 } from './rewards/chests'
+import type { ChestRarity } from './progress/store'
 import { evaluateAchievements } from './rewards/achievements'
 import {
   playChestOpen,
@@ -88,11 +89,35 @@ function applyChrome(): void {
   document.documentElement.dataset.anim = progress.animationSpeed
 }
 
+function formatTitle(id: string): string {
+  return id
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
+function rarityRank(r: ChestRarity): number {
+  const order: ChestRarity[] = [
+    'wooden',
+    'bronze',
+    'silver',
+    'golden',
+    'diamond',
+    'legendary',
+    'epic',
+  ]
+  return order.indexOf(r)
+}
+
+function betterRarity(a: ChestRarity, b: ChestRarity): ChestRarity {
+  return rarityRank(a) >= rarityRank(b) ? a : b
+}
+
 function shell(content: string): string {
   const nav = NAV.map(
     (n) =>
       `<button type="button" class="nav-btn ${view === n.id || (view === 'lesson' && n.id === 'tutor') || (view === 'onboarding' && n.id === 'tutor') ? 'active' : ''}" data-nav="${n.id}" ${!progress.onboardingComplete && n.id !== 'tutor' && n.id !== 'settings' ? 'disabled' : ''}>
-        <span>${n.icon}</span>${n.label}
+        <span class="nav-ico">${n.icon}</span><span>${n.label}</span>
       </button>`,
   ).join('')
 
@@ -104,20 +129,20 @@ function shell(content: string): string {
           <img class="brand-logo" src="./icon-128.png" width="48" height="48" alt="Typing Practice" />
           <div>
             <h1>Typing Practice</h1>
-            <p class="brand-sub">Tutor · Treasure · Speed · ${escapeHtml(progress.activeTitle)}</p>
+            <p class="brand-sub">Tutor · Treasure · Speed · ${escapeHtml(formatTitle(progress.activeTitle))}</p>
           </div>
         </div>
       </div>
-      <div class="wallet-mini">
-        <span>Lv ${progress.level}</span>
-        <span>🪙 ${progress.coins}</span>
-        <span>💎 ${progress.gems}</span>
-        <span>🔥 ${progress.streakDays}</span>
+      <div class="wallet-mini" aria-label="Player stats">
+        <span class="chip">Lv ${progress.level}</span>
+        <span class="chip">Coins ${progress.coins}</span>
+        <span class="chip">Gems ${progress.gems}</span>
+        <span class="chip">Streak ${progress.streakDays}d</span>
       </div>
     </header>
     <nav class="main-nav">${nav}</nav>
-    <div id="view-root">${content}</div>
-    <p class="footer-note">Typing Practice Tutor · Accuracy earns better treasure · Inspired by Keyboard Typing for Programmers</p>
+    <div id="view-root" class="view-root">${content}</div>
+    <p class="footer-note">Typing Practice · Accuracy earns better treasure · Accuracy before speed</p>
   </div>`
 }
 
@@ -434,6 +459,7 @@ function startLessonSession(focus: boolean): void {
       }
     }
     if (focus) input.focus()
+    else setTimeout(() => input?.focus(), 50)
   }
 }
 
@@ -459,14 +485,20 @@ async function onLessonFinished(state: ReturnType<TutorEngine['getState']>): Pro
     progress = markLessonComplete(progress, state.lesson.id, accuracy, wpm)
   }
 
-  let rarity = chestFromAccuracy(accuracy)
+  // Accuracy first: failing the pass gate still gives a soft wooden chest only
+  let rarity: ChestRarity = passed
+    ? chestFromAccuracy(accuracy)
+    : 'wooden'
   const streakBonus = streakChest(progress.streakDays)
-  // milestone streak days exact match boost
-  if ([3, 7, 15, 30, 100].includes(progress.streakDays) && streakBonus) {
-    rarity = streakBonus
+  if (
+    passed &&
+    [3, 7, 15, 30, 100].includes(progress.streakDays) &&
+    streakBonus
+  ) {
+    rarity = betterRarity(rarity, streakBonus)
   }
 
-  let rewards = rollRewards(rarity, accuracy, wpm)
+  const rewards = rollRewards(rarity, accuracy, wpm)
   progress = applyChestToProgress(progress, {
     at: Date.now(),
     rarity,
@@ -487,13 +519,22 @@ async function onLessonFinished(state: ReturnType<TutorEngine['getState']>): Pro
   persist()
 
   playChestOpen(progress.soundEnabled)
+  const passNote = passed
+    ? undefined
+    : [
+        `Need ${state.lesson.passAccuracy}% to unlock the next lesson (you scored ${accuracy}%). Keep practicing — accuracy first.`,
+      ]
   showModal(
     renderChestModal(rarity, rewards, {
-      achievements: ach.unlocked.map((a) => a.title),
+      achievements: [
+        ...(ach.unlocked.map((a) => a.title)),
+        ...(passNote ?? []),
+      ],
+      surprise: false,
     }),
   )
 
-  if (shouldSurpriseMap() && accuracy >= 80) {
+  if (passed && shouldSurpriseMap() && accuracy >= 90) {
     setTimeout(() => {
       if (!document.querySelector('#map-modal')) showModal(renderSurpriseMap())
     }, 600)
@@ -511,7 +552,7 @@ function showModal(html: string): void {
     confetti.innerHTML = Array.from({ length: 40 }, (_, i) => {
       const left = Math.random() * 100
       const delay = Math.random() * 0.8
-      const color = ['#0b6e63', '#f5c542', '#5ec8ff', '#ff6b6b', '#c084fc'][i % 5]
+      const color = ['#3b82f6', '#f97316', '#5ec8ff', '#fbbf24', '#38bdf8'][i % 5]
       return `<i style="left:${left}%;animation-delay:${delay}s;background:${color}"></i>`
     }).join('')
   }
@@ -692,10 +733,11 @@ function updateArena(state: EngineState): void {
   }
 }
 
-let lastArenaAward = 0
+let lastArenaAwardToken = ''
 function awardArenaChest(accuracy: number, wpm: number): void {
-  if (Date.now() - lastArenaAward < 2000) return
-  lastArenaAward = Date.now()
+  const token = `${arenaEngine.getState().startedAt}-${arenaEngine.getState().endedAt}`
+  if (!token || lastArenaAwardToken === token) return
+  lastArenaAwardToken = token
   progress = touchStreak(progress)
   const rarity = chestFromAccuracy(accuracy)
   const rewards = rollRewards(rarity, accuracy, wpm)

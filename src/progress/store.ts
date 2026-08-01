@@ -90,7 +90,7 @@ export interface FingerStat {
 }
 
 export interface TutorProgress {
-  version: 1
+  version: 2
   onboardingComplete: boolean
   onboardingStep: number
   completedLessons: string[]
@@ -150,7 +150,7 @@ export function levelFromXp(xp: number): number {
 
 export function defaultProgress(): TutorProgress {
   return {
-    version: 1,
+    version: 2,
     onboardingComplete: false,
     onboardingStep: 0,
     completedLessons: [],
@@ -186,7 +186,7 @@ export function defaultProgress(): TutorProgress {
     lastPracticeDate: '',
     soundEnabled: true,
     narrationEnabled: false,
-    darkMode: false,
+    darkMode: true,
     animationSpeed: 'normal',
     layout: 'qwerty',
     language: 'en',
@@ -199,7 +199,12 @@ export function loadProgress(): TutorProgress {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return defaultProgress()
     const parsed = JSON.parse(raw) as Partial<TutorProgress>
-    return { ...defaultProgress(), ...parsed, version: 1 }
+    const merged = { ...defaultProgress(), ...parsed, version: 2 as const }
+    // Brand refresh (v2): prefer dark neon UI unless user already customized later
+    if ((parsed.version ?? 1) < 2) {
+      merged.darkMode = true
+    }
+    return merged
   } catch {
     return defaultProgress()
   }
@@ -210,7 +215,11 @@ export function saveProgress(p: TutorProgress): void {
 }
 
 export function todayStamp(): string {
-  return new Date().toISOString().slice(0, 10)
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 export function touchStreak(p: TutorProgress): TutorProgress {
@@ -218,9 +227,8 @@ export function touchStreak(p: TutorProgress): TutorProgress {
   if (p.lastPracticeDate === today) return p
   const yesterday = new Date()
   yesterday.setDate(yesterday.getDate() - 1)
-  const y = yesterday.toISOString().slice(0, 10)
-  const streak =
-    p.lastPracticeDate === y ? p.streakDays + 1 : p.lastPracticeDate ? 1 : 1
+  const y = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
+  const streak = p.lastPracticeDate === y ? p.streakDays + 1 : 1
   return { ...p, streakDays: streak, lastPracticeDate: today }
 }
 
@@ -239,9 +247,10 @@ export function markLessonComplete(
   accuracy: number,
   wpm: number,
 ): TutorProgress {
-  const completed = p.completedLessons.includes(lessonId)
-    ? p.completedLessons
-    : [...p.completedLessons, lessonId]
+  const wasNew = !p.completedLessons.includes(lessonId)
+  const completed = wasNew
+    ? [...p.completedLessons, lessonId]
+    : p.completedLessons
   const prev = p.lessonBest[lessonId]
   const stars =
     accuracy >= 98 ? 3 : accuracy >= 92 ? 2 : accuracy >= 85 ? 1 : 0
@@ -254,7 +263,7 @@ export function markLessonComplete(
     ...p,
     completedLessons: completed,
     lessonBest: { ...p.lessonBest, [lessonId]: best },
-    totalLessonsFinished: p.totalLessonsFinished + 1,
+    totalLessonsFinished: p.totalLessonsFinished + (wasNew ? 1 : 0),
     bestWpm: Math.max(p.bestWpm, wpm),
     currentLessonId: lessonId,
   }

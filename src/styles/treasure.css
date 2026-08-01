@@ -20,7 +20,28 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 0.8rem 0.9rem;
-  background: #fbfcfb;
+  background: rgba(16, 24, 42, 0.92);
+}
+
+.collect-item {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem;
+  background: rgba(16, 24, 42, 0.92);
+  min-height: 5.5rem;
+}
+
+.modal {
+  width: min(100%, 420px);
+  background: linear-gradient(180deg, #151d33, #0d1424);
+  border: 1px solid #334155;
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  color: #e8eefc;
 }
 
 .chest-card h3 {
@@ -45,28 +66,28 @@
 }
 .chest-bronze {
   border-color: #cd7f32;
-  background: linear-gradient(180deg, #fff8f0, #fff);
+  background: linear-gradient(180deg, #2a1c12, #16120e);
 }
 .chest-silver {
-  border-color: #a8b4c0;
-  background: linear-gradient(180deg, #f4f7fb, #fff);
+  border-color: #94a3b8;
+  background: linear-gradient(180deg, #1c2433, #12161f);
 }
 .chest-golden {
   border-color: #e0b030;
-  background: linear-gradient(180deg, #fff9e8, #fff);
+  background: linear-gradient(180deg, #2a220f, #16130a);
 }
 .chest-diamond {
   border-color: #5ec8ff;
-  background: linear-gradient(180deg, #eef9ff, #fff);
+  background: linear-gradient(180deg, #0f2433, #0b1520);
 }
 .chest-legendary {
-  border-color: #c084fc;
-  background: linear-gradient(180deg, #f7efff, #fff);
-  box-shadow: 0 0 24px rgba(192, 132, 252, 0.25);
+  border-color: #60a5fa;
+  background: linear-gradient(180deg, #172554, #0b1224);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.28);
 }
 .chest-epic {
   border-color: #f97316;
-  background: linear-gradient(180deg, #fff4eb, #fff);
+  background: linear-gradient(180deg, #2a160c, #160e08);
 }
 
 .collect-grid {
@@ -76,21 +97,13 @@
   margin-top: 0.75rem;
 }
 
-.collect-item {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 0.7rem;
-  background: #fbfcfb;
-  min-height: 5.5rem;
-}
-
 .collect-item.locked {
   opacity: 0.55;
   filter: grayscale(0.4);
 }
 
 .collect-item.unlocked {
-  border-color: #9fd0bf;
+  border-color: #3b82f6;
 }
 
 .collect-icon {
@@ -113,24 +126,12 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 18, 16, 0.55);
+  background: rgba(4, 8, 18, 0.72);
   display: grid;
   place-items: center;
   z-index: 50;
   padding: 1rem;
   animation: fade-up 0.25s ease;
-}
-
-.modal {
-  width: min(100%, 420px);
-  background: var(--bg-elevated);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 1.25rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
 }
 
 .chest-stage {
@@ -146,7 +147,7 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(245, 197, 66, 0.55), transparent 70%);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.55), rgba(249, 115, 22, 0.2), transparent 70%);
   animation: glow-pulse 1.2s ease-in-out infinite;
 }
 

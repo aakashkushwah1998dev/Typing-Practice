@@ -116,6 +116,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     description: 'Finish 100 lesson sessions (replays count).',
     rewards: [
       { kind: 'title', itemId: 'typing-master', label: 'Typing Master' },
+      { kind: 'badge', itemId: 'typing-master-badge', label: 'Typing Master Badge' },
       { kind: 'frame', itemId: 'master-frame', label: 'Master Frame' },
     ],
   },

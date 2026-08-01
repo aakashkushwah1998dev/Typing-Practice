@@ -102,7 +102,7 @@ export function renderLessonPlayer(
           <div class="stat"><div class="label">Time</div><div class="value" id="t-time">${formatTime(state?.metrics.elapsedMs ?? 0)}</div></div>
         </div>
 
-        <div class="coach-line" id="coach-line">${escapeHtml(cur?.explanation ?? 'Press Start to begin guided practice.')}</div>
+        <div class="coach-line" id="coach-line">${escapeHtml(cur?.explanation ?? 'Type the highlighted key — watch the finger and keyboard glow.')}</div>
         <div class="error-line ${state?.lastError ? 'visible' : ''}" id="error-line">${escapeHtml(state?.lastError ?? '')}</div>
 
         <div class="target-stage" id="target-stage">

@@ -38,10 +38,10 @@ export type TutorListener = (state: TutorSessionState) => void
 
 function buildSequence(lesson: LessonDef, mode: LessonMode): string {
   const parts = lesson.drills[mode]
-  if (mode === 'guided') {
-    return parts.join('')
-  }
-  return parts.join(mode === 'practice' ? ' ' : ' ')
+  if (mode === 'guided') return parts.join('')
+  if (mode === 'challenge') return parts.join(' · ')
+  if (mode === 'timed') return parts.join(' ')
+  return parts.join(' ')
 }
 
 export class TutorEngine {
@@ -87,13 +87,27 @@ export class TutorEngine {
       this.startedAt === null
         ? 0
         : Math.max(0, (this.endedAt ?? performance.now()) - this.startedAt)
-    const expectedSlice = this.sequence.slice(0, this.typed.length)
-    const metrics = computeMetrics(
-      this.mode === 'guided' ? this.sequence.slice(0, Math.max(this.typed.length, 1)) : this.sequence,
+
+    // Mistake-aware accuracy: wrong presses count even though we don't advance
+    const attempts = this.typed.length + this.mistakes
+    const base = computeMetrics(
+      this.mode === 'guided'
+        ? this.sequence.slice(0, Math.max(this.typed.length, 1))
+        : this.sequence,
       this.typed,
       elapsed,
       this.status === 'finished',
     )
+    const accuracy =
+      attempts === 0
+        ? 100
+        : Math.max(0, Math.round((this.typed.length / attempts) * 100))
+    const metrics = {
+      ...base,
+      accuracy,
+      mistakes: this.mistakes,
+      incorrectChars: this.mistakes,
+    }
     // For guided, progress by index
     if (this.mode === 'guided') {
       metrics.progress =
@@ -113,7 +127,6 @@ export class TutorEngine {
         }
       : null
 
-    void expectedSlice
     return {
       mode: this.mode,
       lesson,

@@ -12,15 +12,15 @@ Inspired by *Keyboard Typing for Programmers*.
 
 ### Windows installer (recommended)
 
-After building (or from a GitHub Release), install with:
+Download from the [GitHub Releases](https://github.com/aakashkushwah1998dev/Typing-Practice/releases) page:
 
-1. Download **`Typing Practice-1.0.0-x64.exe`** (full installer)
+1. Download **`Typing Practice-1.1.0-x64.exe`** (full installer)
 2. Run it → choose install folder → Finish
 3. Launch **Typing Practice** from the Start Menu or Desktop shortcut
 
 Or use the portable build (no install):
 
-- Run **`Typing Practice-1.0.0-portable.exe`** from any folder (USB, Downloads, etc.)
+- Run **`Typing Practice-1.1.0-portable.exe`** from any folder
 
 Build installers yourself:
 
@@ -30,14 +30,9 @@ npm install
 npm run dist:win
 ```
 
-Outputs land in the `release\` folder:
+Outputs land in the `release\` folder.
 
-| File | Use |
-|------|-----|
-| `Typing Practice-1.0.0-x64.exe` | Installable setup (NSIS) |
-| `Typing Practice-1.0.0-portable.exe` | Portable, no install |
-
-> Windows may show SmartScreen for unsigned apps. Choose **More info → Run anyway**. Code signing can be added later with a certificate.
+> Windows may show SmartScreen for unsigned apps. Choose **More info → Run anyway**.
 
 ### Web / developer mode
 

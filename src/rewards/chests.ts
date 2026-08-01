@@ -178,7 +178,7 @@ export const COLLECTION_CATALOG: {
   { id: 'cyan', kind: 'hand', label: 'Cyan Hands', rarity: 'rare' },
   { id: 'rose', kind: 'hand', label: 'Rose Hands', rarity: 'rare' },
   { id: 'programmer', kind: 'badge', label: 'Programmer', rarity: 'legendary' },
-  { id: 'typing-master', kind: 'badge', label: 'Typing Master', rarity: 'legendary' },
+  { id: 'typing-master-badge', kind: 'badge', label: 'Typing Master', rarity: 'legendary' },
   { id: 'novice', kind: 'title', label: 'Novice', rarity: 'common' },
   { id: 'home-row-hero', kind: 'title', label: 'Home Row Hero', rarity: 'rare' },
   { id: 'accuracy-ace', kind: 'title', label: 'Accuracy Ace', rarity: 'rare' },

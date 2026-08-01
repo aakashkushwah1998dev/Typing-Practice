@@ -2,7 +2,7 @@
  * Interactive visual keyboard renderer.
  */
 
-import { KEYBOARD_ROWS, getAssignment, requiresShift } from './fingerMap'
+import { KEYBOARD_ROWS, getAssignment, normalizeChar, requiresShift } from './fingerMap'
 
 export type KeyVisualState = 'idle' | 'target' | 'correct' | 'wrong' | 'zone'
 
@@ -79,7 +79,7 @@ export function renderKeyboardHtml(options?: {
 }
 
 function normalizeActive(k: string): string {
-  if (k.length === 1) return k.toLowerCase()
+  if (k.length === 1) return normalizeChar(k)
   return k
 }
 
