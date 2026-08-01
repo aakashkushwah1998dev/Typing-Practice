@@ -101,7 +101,7 @@ function shell(content: string): string {
     <header class="topbar">
       <div class="brand">
         <div class="brand-mark">
-          <div class="logo" aria-hidden="true">Aa</div>
+          <img class="brand-logo" src="./icon-128.png" width="48" height="48" alt="Typing Practice" />
           <div>
             <h1>Typing Practice</h1>
             <p class="brand-sub">Tutor · Treasure · Speed · ${escapeHtml(progress.activeTitle)}</p>

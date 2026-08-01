@@ -22,6 +22,7 @@
     "cross-env": "^7.0.3",
     "electron": "^34.0.0",
     "electron-builder": "^25.1.8",
+    "png-to-ico": "^3.0.2",
     "typescript": "~5.7.2",
     "vite": "^6.0.7",
     "vitest": "^2.1.8",
@@ -38,24 +39,35 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
+      "build/icon.ico",
+      "build/icon.png",
       "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "icon.ico"
+      }
     ],
     "asar": true,
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
-      "signAndEditExecutable": false,
-      "signingHashAlgorithms": []
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,

@@ -6,13 +6,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const isDev = !app.isPackaged
 
 function createWindow(): void {
+  const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'icon.ico')
+    : path.join(__dirname, '..', 'build', 'icon.ico')
+
   const win = new BrowserWindow({
     width: 1280,
     height: 860,
     minWidth: 900,
     minHeight: 640,
     title: 'Typing Practice',
-    backgroundColor: '#f4f7f6',
+    icon: iconPath,
+    backgroundColor: '#0a0e1a',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
