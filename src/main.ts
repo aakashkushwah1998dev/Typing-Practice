@@ -19,7 +19,7 @@ import {
 } from './progress/store'
 import { getLesson, LESSONS, type LessonMode } from './tutor/lessons'
 import { TutorEngine } from './tutor/tutorEngine'
-import { setHandHighlight } from './tutor/handsView'
+import { setHandHighlight, syncHandsToCurrentChar } from './tutor/handsView'
 import { setKeyboardKeyState, renderKeyboardHtml } from './tutor/keyboardView'
 import { renderOnboarding } from './ui/onboardingView'
 import { patchLessonLive, renderLessonPlayer, renderTutorHub } from './ui/tutorView'
@@ -391,15 +391,13 @@ function startLessonSession(focus: boolean): void {
   unsubTutor = tutor.subscribe((state) => {
     patchLessonLive(root, state)
     const cur = state.current
-    if (cur?.finger && cur.hand) {
-      setHandHighlight(
-        root,
-        cur.hand,
-        cur.finger,
-        state.lastError ? 'reach' : 'press',
-        cur.explanation,
-      )
-    }
+    // Always mirror the NEXT character to type (never the previous key)
+    syncHandsToCurrentChar(
+      root,
+      cur?.char,
+      state.lastError ? 'reach' : 'press',
+      cur?.explanation,
+    )
     setKeyboardKeyState(
       root,
       cur?.char ?? null,
@@ -420,6 +418,8 @@ function startLessonSession(focus: boolean): void {
       const ch = e.key
       const result = tutor.handleChar(ch)
       const assign = getAssignment(result.expected)
+      const next = tutor.getState()
+
       if (result.correct) {
         playCorrect(progress.soundEnabled)
         if (assign) {
@@ -431,7 +431,7 @@ function startLessonSession(focus: boolean): void {
             assign.hand,
             result.reactionMs,
           )
-          setHandHighlight(root, assign.hand, assign.finger, 'return')
+          // Brief flash on the key just pressed, then lock onto the next target
           setKeyboardKeyState(root, result.expected, 'correct')
         }
         persist()
@@ -446,16 +446,20 @@ function startLessonSession(focus: boolean): void {
             assign.hand,
             0,
           )
-          setHandHighlight(
-            root,
-            assign.hand,
-            assign.finger,
-            'reach',
-            tutor.getState().lastError ?? '',
-          )
           setKeyboardKeyState(root, result.expected, 'wrong')
         }
         persist()
+      }
+
+      // Hands + coach always follow the current target character in parallel
+      syncHandsToCurrentChar(
+        root,
+        next.current?.char,
+        result.correct ? 'press' : 'reach',
+        next.current?.explanation ?? next.lastError ?? undefined,
+      )
+      if (next.current?.char && result.correct) {
+        setKeyboardKeyState(root, next.current.char, 'target')
       }
     }
     if (focus) input.focus()

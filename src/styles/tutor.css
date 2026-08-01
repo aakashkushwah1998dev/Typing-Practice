@@ -478,9 +478,16 @@ html[data-keycap='midnight'] .key {
 
 .finger.is-active .finger-bone,
 .finger.is-active .finger-tip {
-  fill: #f5c542;
-  stroke: #c99520;
-  filter: drop-shadow(0 0 6px rgba(245, 197, 66, 0.65));
+  fill: #38bdf8;
+  stroke: #0284c7;
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.85));
+}
+
+.finger.is-active[data-finger='thumb'] .finger-bone,
+.finger.is-active[data-finger='thumb'] .finger-tip {
+  fill: #f97316;
+  stroke: #ea580c;
+  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.85));
 }
 
 .finger.is-reach {
