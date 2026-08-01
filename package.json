@@ -1,7 +1,7 @@
 {
   "name": "typing-practice",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Typing Practice — beginner typing tutor, treasure quest, and programmer speed training",
   "author": "aakashkushwah1998dev",
   "main": "electron/main.mjs",
