@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+*.local
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cursor / AI tooling (do not upload)
+.cursor/
+.cursor.md
+*.cursor.md
+.cursorrules
+AGENTS.md
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs & cache
+*.log
+npm-debug.log*
+.vite/
+coverage/
+
+# Env (never commit secrets)
+.env
+.env.*
+!.env.example
