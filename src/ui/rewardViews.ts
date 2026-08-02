@@ -107,12 +107,37 @@ export function renderAnalytics(p: TutorProgress): string {
 }
 
 export function renderSettings(p: TutorProgress): string {
+  const c = p.customTheme
+  const customHidden = p.appearanceMode === 'custom' ? '' : 'hidden'
   return `
   <section class="panel">
     <div class="panel-body settings-grid">
       <p class="eyebrow">Settings</p>
       <h2>Customize your tutor</h2>
-      <label class="field row"><span>Dark mode</span><input type="checkbox" id="set-dark" ${p.darkMode ? 'checked' : ''} /></label>
+
+      <div class="field">
+        <label for="set-appearance">Theme</label>
+        <select id="set-appearance">
+          <option value="dark" ${p.appearanceMode === 'dark' ? 'selected' : ''}>Dark</option>
+          <option value="bright" ${p.appearanceMode === 'bright' ? 'selected' : ''}>Bright</option>
+          <option value="system" ${p.appearanceMode === 'system' ? 'selected' : ''}>System</option>
+          <option value="custom" ${p.appearanceMode === 'custom' ? 'selected' : ''}>Custom</option>
+        </select>
+        <p class="hint">Dark / Bright / follow Windows (System) / or pick your own colors.</p>
+      </div>
+
+      <div id="custom-theme-panel" class="custom-theme-panel ${customHidden}">
+        <h3>Custom colors</h3>
+        <div class="color-grid">
+          <label class="color-field">Background <input type="color" id="cust-bg" value="${c.bg}" /></label>
+          <label class="color-field">Cards <input type="color" id="cust-elevated" value="${c.elevated}" /></label>
+          <label class="color-field">Text <input type="color" id="cust-ink" value="${c.ink}" /></label>
+          <label class="color-field">Muted text <input type="color" id="cust-muted" value="${c.muted}" /></label>
+          <label class="color-field">Accent <input type="color" id="cust-accent" value="${c.accent}" /></label>
+          <label class="color-field">Warm accent <input type="color" id="cust-warm" value="${c.accentWarm}" /></label>
+        </div>
+      </div>
+
       <label class="field row"><span>Sound effects</span><input type="checkbox" id="set-sound" ${p.soundEnabled ? 'checked' : ''} /></label>
       <label class="field row"><span>Lesson narration (beeps)</span><input type="checkbox" id="set-narration" ${p.narrationEnabled ? 'checked' : ''} /></label>
       <div class="field"><label for="set-anim">Animation speed</label>
@@ -129,7 +154,7 @@ export function renderSettings(p: TutorProgress): string {
           <option value="advanced" ${p.difficulty === 'advanced' ? 'selected' : ''}>Advanced</option>
         </select>
       </div>
-      <div class="field"><label for="set-theme">Keyboard theme</label>
+      <div class="field"><label for="set-theme">Accent pack</label>
         <select id="set-theme">
           ${p.themes.map((t) => `<option value="${t}" ${p.activeTheme === t ? 'selected' : ''}>${t}</option>`).join('')}
         </select>

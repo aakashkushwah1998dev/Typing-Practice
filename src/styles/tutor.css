@@ -83,11 +83,12 @@
 }
 
 .hero-stats div {
-  background: #f4faf8;
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 0.5rem 0.7rem;
   min-width: 4.5rem;
+  color: var(--ink);
 }
 
 .hero-stats strong {
@@ -147,8 +148,8 @@
 }
 
 .lesson-card.done {
-  border-color: #9fd0bf;
-  background: #f3fbf7;
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .lesson-order {
@@ -209,7 +210,41 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 0.9rem;
-  background: #fbfcfb;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.lesson-card {
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 14px;
+  padding: 0.9rem;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.zone-pill {
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.55rem 0.7rem;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.hands-stage {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  align-items: flex-end;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
 }
 
 .story-card h3 {
@@ -450,7 +485,7 @@ html[data-keycap='midnight'] .key {
   margin: 0.75rem 0;
   padding: 0.75rem;
   border-radius: 14px;
-  background: linear-gradient(180deg, #f7fbfa, #eef5f2);
+  background: var(--card);
   border: 1px solid var(--line);
 }
 
@@ -575,7 +610,8 @@ html[data-anim='fast'] .finger-bone {
 .mode-chip {
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: #fbfcfb;
+  background: var(--card);
+  color: var(--ink);
   padding: 0.35rem 0.75rem;
   text-transform: capitalize;
 }
@@ -623,12 +659,13 @@ html[data-anim='fast'] .finger-bone {
 
 .target-stage {
   position: relative;
-  border: 1px dashed var(--line);
+  border: 1px solid var(--line);
   border-radius: 14px;
   padding: 1rem;
   margin-bottom: 0.5rem;
-  background: #fcfefd;
+  background: var(--card);
   text-align: center;
+  color: var(--ink);
 }
 
 .big-target {

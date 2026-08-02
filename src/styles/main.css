@@ -1,6 +1,7 @@
 :root {
   --bg: #070b16;
   --bg-elevated: #10182a;
+  --card: #151e33;
   --ink: #e8eefc;
   --muted: #93a0bf;
   --line: #243152;
@@ -216,17 +217,19 @@ button {
   background: transparent;
 }
 
-/* Light mode override when user disables dark */
-html:not(.dark) {
+html:not(.dark),
+html.bright {
   color-scheme: light;
   --bg: #f4f7fb;
   --bg-elevated: #ffffff;
+  --card: #ffffff;
   --ink: #142033;
   --muted: #5b6b86;
   --line: #d7deea;
   --accent: #2563eb;
   --accent-soft: #dbeafe;
   --accent-strong: #1d4ed8;
+  --accent-warm: #ea580c;
   --ok: #15803d;
   --ok-bg: #e6f5ec;
   --bad: #b42318;
@@ -238,22 +241,66 @@ html:not(.dark) {
   --shadow: 0 10px 30px rgba(20, 34, 60, 0.08);
 }
 
-html:not(.dark) body {
+html:not(.dark) body,
+html.bright body {
   background:
     radial-gradient(1000px 420px at 10% -10%, #dbeafe 0%, transparent 55%),
     radial-gradient(800px 360px at 100% 0%, #ffedd5 0%, transparent 50%),
     linear-gradient(180deg, #eef3fb 0%, var(--bg) 45%, #e8eef8 100%);
 }
 
-html:not(.dark) .brand h1 {
+html:not(.dark) .brand h1,
+html.bright .brand h1 {
   background: none;
   color: var(--ink);
   -webkit-background-clip: initial;
   background-clip: initial;
 }
 
-html:not(.dark) .panel {
+html:not(.dark) .panel,
+html.bright .panel {
   background: var(--bg-elevated);
+}
+
+.custom-theme-panel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.85rem;
+  margin-bottom: 1rem;
+  background: var(--card);
+}
+
+.custom-theme-panel.hidden {
+  display: none;
+}
+
+.custom-theme-panel h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.55rem;
+}
+
+.color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.color-field input[type='color'] {
+  width: 100%;
+  height: 2.2rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  padding: 0.15rem;
+  cursor: pointer;
 }
 
 .layout {
@@ -314,7 +361,7 @@ html:not(.dark) .panel {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 0.55rem 0.7rem;
-  background: #fbfcfb;
+  background: var(--card);
   color: var(--ink);
 }
 
@@ -340,7 +387,8 @@ html:not(.dark) .panel {
 .mode-btn {
   text-align: left;
   border: 1px solid var(--line);
-  background: #fbfcfb;
+  background: var(--card);
+  color: var(--ink);
   border-radius: 12px;
   padding: 0.65rem 0.75rem;
   transition: border-color 0.15s ease, background 0.15s ease;
@@ -377,10 +425,11 @@ html:not(.dark) .panel {
 }
 
 .stat {
-  background: #f7faf9;
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 0.7rem 0.75rem;
+  color: var(--ink);
 }
 
 .stat .label {
@@ -395,6 +444,7 @@ html:not(.dark) .panel {
   font-family: var(--mono);
   font-size: 1.25rem;
   font-weight: 600;
+  color: var(--ink);
 }
 
 .stat .sub {

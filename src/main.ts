@@ -49,6 +49,7 @@ import {
   playWrong,
 } from './audio/sounds'
 import { getAssignment } from './tutor/fingerMap'
+import { applyAppearanceToDocument, type AppearanceMode } from './core/theme'
 import { loadSettings, saveSettings, type AppSettings } from './core/settings'
 import { TypingEngine, type EngineState } from './core/typingEngine'
 import { formatTime, wpmLevel } from './core/metrics'
@@ -85,8 +86,8 @@ function persist(): void {
 function applyChrome(): void {
   document.documentElement.dataset.theme = progress.activeTheme
   document.documentElement.dataset.keycap = progress.activeKeycap
-  document.documentElement.classList.toggle('dark', progress.darkMode)
   document.documentElement.dataset.anim = progress.animationSpeed
+  applyAppearanceToDocument(progress.appearanceMode, progress.customTheme)
 }
 
 function formatTitle(id: string): string {
@@ -333,9 +334,37 @@ function wireSettings(): void {
       applyChrome()
     })
   }
-  bind('set-dark', (v) => {
-    progress = { ...progress, darkMode: Boolean(v) }
+
+  const appearance = root.querySelector<HTMLSelectElement>('#set-appearance')
+  appearance?.addEventListener('change', () => {
+    const mode = appearance.value as AppearanceMode
+    progress = { ...progress, appearanceMode: mode }
+    const panel = root.querySelector('#custom-theme-panel')
+    panel?.classList.toggle('hidden', mode !== 'custom')
+    persist()
+    applyChrome()
+    // Re-render settings so color panel state stays in sync when switching away/to custom
+    if (view === 'settings') render()
   })
+
+  const bindColor = (id: string, key: keyof typeof progress.customTheme) => {
+    root.querySelector<HTMLInputElement>(`#${id}`)?.addEventListener('input', (e) => {
+      const value = (e.target as HTMLInputElement).value
+      progress = {
+        ...progress,
+        customTheme: { ...progress.customTheme, [key]: value },
+      }
+      persist()
+      applyChrome()
+    })
+  }
+  bindColor('cust-bg', 'bg')
+  bindColor('cust-elevated', 'elevated')
+  bindColor('cust-ink', 'ink')
+  bindColor('cust-muted', 'muted')
+  bindColor('cust-accent', 'accent')
+  bindColor('cust-warm', 'accentWarm')
+
   bind('set-sound', (v) => {
     progress = { ...progress, soundEnabled: Boolean(v) }
   })
@@ -366,6 +395,14 @@ function wireSettings(): void {
   bind('set-title', (v) => {
     progress = { ...progress, activeTitle: v as TitleId }
   })
+
+  // Follow OS theme live when "system" is selected
+  const mq = window.matchMedia('(prefers-color-scheme: dark)')
+  const onScheme = () => {
+    if (progress.appearanceMode === 'system') applyChrome()
+  }
+  mq.removeEventListener?.('change', onScheme)
+  mq.addEventListener?.('change', onScheme)
 }
 
 function startLessonSession(focus: boolean): void {

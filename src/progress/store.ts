@@ -4,6 +4,13 @@
 
 import { LESSONS } from '../tutor/lessons'
 import type { Finger, Hand } from '../tutor/fingerMap'
+import {
+  DEFAULT_CUSTOM,
+  validateAppearance,
+  validateCustomColors,
+  type AppearanceMode,
+  type CustomThemeColors,
+} from '../core/theme'
 
 export type ThemeId =
   | 'default'
@@ -90,7 +97,7 @@ export interface FingerStat {
 }
 
 export interface TutorProgress {
-  version: 2
+  version: 3
   onboardingComplete: boolean
   onboardingStep: number
   completedLessons: string[]
@@ -129,7 +136,10 @@ export interface TutorProgress {
   lastPracticeDate: string // YYYY-MM-DD
   soundEnabled: boolean
   narrationEnabled: boolean
+  /** @deprecated migrated to appearanceMode */
   darkMode: boolean
+  appearanceMode: AppearanceMode
+  customTheme: CustomThemeColors
   animationSpeed: 'slow' | 'normal' | 'fast'
   layout: 'qwerty'
   language: 'en'
@@ -150,7 +160,7 @@ export function levelFromXp(xp: number): number {
 
 export function defaultProgress(): TutorProgress {
   return {
-    version: 2,
+    version: 3,
     onboardingComplete: false,
     onboardingStep: 0,
     completedLessons: [],
@@ -187,6 +197,8 @@ export function defaultProgress(): TutorProgress {
     soundEnabled: true,
     narrationEnabled: false,
     darkMode: true,
+    appearanceMode: 'dark',
+    customTheme: { ...DEFAULT_CUSTOM },
     animationSpeed: 'normal',
     layout: 'qwerty',
     language: 'en',
@@ -198,12 +210,20 @@ export function loadProgress(): TutorProgress {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return defaultProgress()
-    const parsed = JSON.parse(raw) as Partial<TutorProgress>
-    const merged = { ...defaultProgress(), ...parsed, version: 2 as const }
-    // Brand refresh (v2): prefer dark neon UI unless user already customized later
-    if ((parsed.version ?? 1) < 2) {
-      merged.darkMode = true
+    const parsed = JSON.parse(raw) as Partial<TutorProgress> & {
+      darkMode?: boolean
     }
+    const merged: TutorProgress = {
+      ...defaultProgress(),
+      ...parsed,
+      version: 3,
+      appearanceMode: validateAppearance(
+        parsed.appearanceMode ??
+          (parsed.darkMode === false ? 'bright' : 'dark'),
+      ),
+      customTheme: validateCustomColors(parsed.customTheme),
+    }
+    merged.darkMode = merged.appearanceMode === 'dark' || merged.appearanceMode === 'custom'
     return merged
   } catch {
     return defaultProgress()
