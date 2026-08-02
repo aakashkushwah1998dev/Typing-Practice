@@ -1,5 +1,5 @@
 import { escapeHtml } from '../core/sanitize'
-import { LESSONS } from '../tutor/lessons'
+import { getNextLesson, LESSONS } from '../tutor/lessons'
 import {
   isLessonUnlocked,
   type TutorProgress,
@@ -117,19 +117,42 @@ export function renderLessonPlayer(
           state: 'target',
         })}</div>
 
-        <div class="onboard-actions">
-          <button type="button" class="btn btn-primary" data-action="start-mode">Start ${mode}</button>
-          <button type="button" class="btn" data-action="restart-mode">Restart</button>
+        <div class="onboard-actions" id="lesson-actions">
+          ${renderLessonActions(state, mode)}
         </div>
       </div>
     </div>
   </section>`
 }
 
+export function renderLessonActions(
+  state: TutorSessionState | null,
+  mode: LessonMode,
+): string {
+  if (state?.status === 'finished') {
+    const next = getNextLesson(state.lesson.id)
+    const nextLabel = next
+      ? `Next: ${escapeHtml(next.title)}`
+      : 'Back to lessons'
+    const nextAction = next ? 'next-lesson' : 'back-tutor'
+    return `
+      <button type="button" class="btn btn-primary" data-action="${nextAction}">${nextLabel} →</button>
+      <button type="button" class="btn" data-action="restart-mode">Retry lesson</button>
+      <button type="button" class="btn btn-ghost" data-action="back-tutor">← All lessons</button>`
+  }
+  return `
+    <button type="button" class="btn btn-primary" data-action="start-mode">Start ${mode}</button>
+    <button type="button" class="btn" data-action="restart-mode">Restart</button>`
+}
+
 function renderPrompt(state: TutorSessionState | null): string {
   if (!state) return ''
+  if (state.status === 'finished') {
+    return `<span class="guided-hint guided-done">Lesson complete ✓</span>`
+  }
   if (state.mode === 'guided') {
-    return `<span class="guided-hint">Key ${state.index + 1} of ${state.sequence.length}</span>`
+    const at = Math.min(state.index + 1, state.sequence.length)
+    return `<span class="guided-hint">Key ${at} of ${state.sequence.length}</span>`
   }
   let html = ''
   for (let i = 0; i < state.sequence.length; i++) {
@@ -155,14 +178,19 @@ export function patchLessonLive(root: ParentNode, state: TutorSessionState): voi
   set('t-acc', `${state.metrics.accuracy}%`)
   set('t-mistakes', String(state.mistakes))
   set('t-wpm', String(state.metrics.wpm))
-  set('t-progress', `${state.metrics.progress}%`)
+  set('t-progress', `${Math.min(100, state.metrics.progress)}%`)
   set('t-time', formatTime(state.metrics.elapsedMs))
   const cur = state.current
   set('t-finger', cur?.finger ? `${cur.hand} ${cur.finger}` : '—')
   set('t-key', cur ? (cur.char === ' ' ? 'Space' : cur.char) : '—')
 
   const coach = root.querySelector('#coach-line')
-  if (coach && cur) coach.textContent = cur.explanation
+  if (coach) {
+    coach.textContent =
+      state.status === 'finished'
+        ? 'Nice work — collect your chest, then continue to the next hand.'
+        : cur?.explanation ?? coach.textContent
+  }
 
   const err = root.querySelector('#error-line')
   if (err) {
@@ -175,4 +203,9 @@ export function patchLessonLive(root: ParentNode, state: TutorSessionState): voi
 
   const prompt = root.querySelector('#prompt-line')
   if (prompt) prompt.innerHTML = renderPrompt(state)
+
+  const actions = root.querySelector('#lesson-actions')
+  if (actions && state.status === 'finished') {
+    actions.innerHTML = renderLessonActions(state, state.mode)
+  }
 }

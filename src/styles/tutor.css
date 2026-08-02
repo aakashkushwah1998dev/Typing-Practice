@@ -712,6 +712,11 @@ html[data-anim='fast'] .finger-bone {
   font-size: 0.9rem;
 }
 
+.guided-done {
+  color: var(--accent-strong, #38bdf8);
+  font-weight: 600;
+}
+
 /* Dark mode inherits brand :root; keep class for themes */
 html.dark {
   color-scheme: dark;

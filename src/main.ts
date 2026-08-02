@@ -17,7 +17,7 @@ import {
   type HandSkinId,
   type KeycapSkinId,
 } from './progress/store'
-import { getLesson, LESSONS, type LessonMode } from './tutor/lessons'
+import { getLesson, getNextLesson, LESSONS, type LessonMode } from './tutor/lessons'
 import { TutorEngine } from './tutor/tutorEngine'
 import { setHandHighlight, syncHandsToCurrentChar } from './tutor/handsView'
 import { setKeyboardKeyState, renderKeyboardHtml } from './tutor/keyboardView'
@@ -151,6 +151,7 @@ function render(): void {
   unsubTutor?.()
   unsubTutor = null
   arenaWired = false
+  document.querySelectorAll('.modal-backdrop').forEach((m) => m.remove())
 
   let content = ''
   if (view === 'onboarding') {
@@ -228,9 +229,11 @@ function wireGlobal(): void {
   if (globalWired) return
   globalWired = true
 
-  root.addEventListener('click', (e) => {
+  document.addEventListener('click', (e) => {
     const t = (e.target as HTMLElement).closest<HTMLElement>('[data-action]')
     if (!t?.dataset.action) return
+    // Only handle actions that belong to this app (ignore unrelated pages)
+    if (!root.contains(t) && !t.closest('.modal-backdrop')) return
     const action = t.dataset.action
 
     if (action === 'onboard-next') {
@@ -284,12 +287,21 @@ function wireGlobal(): void {
       view = 'tutor'
       render()
     }
+    if (action === 'next-lesson') {
+      goToNextLesson()
+    }
     if (action === 'start-mode' || action === 'restart-mode') {
       startLessonSession(true)
     }
     if (action === 'close-chest') {
       document.querySelector('#chest-modal')?.remove()
       playCoin(progress.soundEnabled)
+      refreshWalletChips()
+    }
+    if (action === 'close-chest-next') {
+      document.querySelector('#chest-modal')?.remove()
+      playCoin(progress.soundEnabled)
+      goToNextLesson()
     }
     if (action === 'skip-map') {
       document.querySelector('#map-modal')?.remove()
@@ -506,6 +518,28 @@ function startLessonSession(focus: boolean): void {
 
 let lessonFinishToken = ''
 
+function goToNextLesson(): void {
+  const fromId = activeLessonId
+  const next =
+    getNextLesson(fromId) ??
+    LESSONS.find(
+      (l) =>
+        isLessonUnlocked(progress, l.id) &&
+        !progress.completedLessons.includes(l.id),
+    )
+  if (next && isLessonUnlocked(progress, next.id)) {
+    activeLessonId = next.id
+    progress = { ...progress, currentLessonId: next.id }
+    persist()
+    view = 'lesson'
+    lessonMode = 'guided'
+    render()
+    return
+  }
+  view = 'tutor'
+  render()
+}
+
 async function onLessonFinished(state: ReturnType<TutorEngine['getState']>): Promise<void> {
   const token = `${state.lesson.id}-${state.startedAt}-${state.endedAt}`
   if (lessonFinishToken === token) return
@@ -560,6 +594,7 @@ async function onLessonFinished(state: ReturnType<TutorEngine['getState']>): Pro
   persist()
 
   playChestOpen(progress.soundEnabled)
+  const nextLesson = getNextLesson(state.lesson.id)
   const passNote = passed
     ? undefined
     : [
@@ -572,6 +607,10 @@ async function onLessonFinished(state: ReturnType<TutorEngine['getState']>): Pro
         ...(passNote ?? []),
       ],
       surprise: false,
+      nextLessonTitle:
+        passed && nextLesson && isLessonUnlocked(progress, nextLesson.id)
+          ? nextLesson.title
+          : undefined,
     }),
   )
 
@@ -584,11 +623,11 @@ async function onLessonFinished(state: ReturnType<TutorEngine['getState']>): Pro
 
 function showModal(html: string): void {
   document.querySelectorAll('.modal-backdrop').forEach((m) => {
-    if (m.id !== 'chest-modal') m.remove()
+    m.remove()
   })
-  root.insertAdjacentHTML('beforeend', html)
-  // confetti particles
-  const confetti = root.querySelector('.confetti')
+  // Attach to body so fixed positioning is never clipped by app overflow
+  document.body.insertAdjacentHTML('beforeend', html)
+  const confetti = document.querySelector('#chest-modal .confetti')
   if (confetti) {
     confetti.innerHTML = Array.from({ length: 40 }, (_, i) => {
       const left = Math.random() * 100
@@ -597,6 +636,16 @@ function showModal(html: string): void {
       return `<i style="left:${left}%;animation-delay:${delay}s;background:${color}"></i>`
     }).join('')
   }
+}
+
+function refreshWalletChips(): void {
+  const wallet = root.querySelector('.wallet-mini')
+  if (!wallet) return
+  wallet.innerHTML = `
+    <span class="chip">Lv ${progress.level}</span>
+    <span class="chip">Coins ${progress.coins}</span>
+    <span class="chip">Gems ${progress.gems}</span>
+    <span class="chip">Streak ${progress.streakDays}d</span>`
 }
 
 function runSurpriseChallenge(): void {

@@ -5,7 +5,12 @@ node_modules/
 dist/
 dist-ssr/
 release/
+dist-releases/
 *.local
+
+# Installers / packaged apps (keep outside git)
+*.exe
+!electron/**/*.exe
 
 # Editor
 .vscode/*
@@ -31,9 +36,14 @@ Desktop.ini
 
 # Logs & cache
 *.log
+*.out
 npm-debug.log*
 .vite/
 coverage/
+
+# Accidental root Electron copies
+/main.mjs
+/electron-launch.log.out
 
 # Env (never commit secrets)
 .env

@@ -108,12 +108,19 @@ export class TutorEngine {
       mistakes: this.mistakes,
       incorrectChars: this.mistakes,
     }
-    // For guided, progress by index
+    // For guided, progress by index (cap at 100 when finished)
     if (this.mode === 'guided') {
       metrics.progress =
         this.sequence.length === 0
           ? 0
-          : Math.round((this.index / this.sequence.length) * 100)
+          : Math.min(
+              100,
+              Math.round(
+                (Math.min(this.index, this.sequence.length) /
+                  this.sequence.length) *
+                  100,
+              ),
+            )
     }
 
     const ch = this.sequence[this.index] ?? null

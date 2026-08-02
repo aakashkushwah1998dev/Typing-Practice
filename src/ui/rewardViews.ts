@@ -184,9 +184,16 @@ export function renderSettings(p: TutorProgress): string {
 export function renderChestModal(
   rarity: ChestRarity,
   rewards: RewardGrant[],
-  extras?: { surprise?: boolean; achievements?: string[] },
+  extras?: {
+    surprise?: boolean
+    achievements?: string[]
+    nextLessonTitle?: string
+  },
 ): string {
   const meta = CHEST_META[rarity]
+  const continueLabel = extras?.nextLessonTitle
+    ? `Collect & go to ${escapeHtml(extras.nextLessonTitle)}`
+    : 'Collect & continue'
   return `
   <div class="modal-backdrop" id="chest-modal">
     <div class="modal chest-modal ${meta.className}">
@@ -208,7 +215,10 @@ export function renderChestModal(
           ? `<p class="hint">Achievements unlocked: ${extras.achievements.map(escapeHtml).join(', ')}</p>`
           : ''
       }
-      <button type="button" class="btn btn-primary" data-action="close-chest">Collect</button>
+      <div class="onboard-actions">
+        <button type="button" class="btn btn-primary" data-action="close-chest-next">${continueLabel}</button>
+        <button type="button" class="btn" data-action="close-chest">Collect</button>
+      </div>
     </div>
   </div>`
 }
